@@ -72,7 +72,7 @@ export function UrgencyBanner() {
             ? 'Desde el 2 de abril de 2026, todos los establecimientos de hosteleria estan obligados a cumplir con la normativa de desperdicio alimentario. Las multas pueden alcanzar los 500.000€.'
             : 'Preparate antes de que entre en vigor. Las multas pueden alcanzar los 500.000€.'}
         </p>
-        <div className="mt-6 grid grid-cols-3 gap-4 max-w-md">
+        <div className="mt-6 grid grid-cols-3 gap-4 max-w-md mx-auto">
           <div className="rounded-xl bg-white/10 backdrop-blur p-4 text-center">
             <div className="text-3xl font-bold text-white">2.000€</div>
             <div className="text-xs text-red-300 mt-1">Multa minima</div>
