@@ -24,12 +24,12 @@ const CATEGORY_BG: Record<WasteCategory, string> = {
 };
 
 const CATEGORY_ICONS: Record<WasteCategory, string> = {
-  bakery: '\uD83C\uDF5E',
-  protein: '\uD83E\uDD69',
-  dairy: '\uD83E\uDDC0',
-  produce: '\uD83E\uDD66',
-  prepared: '\uD83C\uDF72',
-  other: '\uD83D\uDCE6',
+  bakery: '🍞',
+  protein: '🥩',
+  dairy: '🧀',
+  produce: '🥦',
+  prepared: '🍲',
+  other: '📦',
 };
 
 const DESTINATION_BG: Record<WasteDestination, string> = {
@@ -40,10 +40,10 @@ const DESTINATION_BG: Record<WasteDestination, string> = {
 };
 
 const DESTINATION_ICONS: Record<WasteDestination, string> = {
-  donation: '\u2764\uFE0F',
-  compost: '\uD83C\uDF31',
-  animal_feed: '\uD83D\uDC04',
-  destruction: '\uD83D\uDDD1\uFE0F',
+  donation: '❤️',
+  compost: '🌱',
+  animal_feed: '🐄',
+  destruction: '🗑️',
 };
 
 // ── Trigger button (exported for use in dashboard page) ──
@@ -206,7 +206,7 @@ function WasteFormModal({
                   style={{ minHeight: '64px' }}
                 >
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900 text-xl">
-                    \uD83C\uDFEA
+                    🏪
                   </div>
                   <div>
                     <p className="font-semibold text-[var(--text-primary)]">{loc.name}</p>
