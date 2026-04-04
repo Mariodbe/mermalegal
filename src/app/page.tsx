@@ -94,7 +94,7 @@ export default async function HomePage() {
 
                 <p className="mt-5 text-xl text-[var(--text-secondary)] max-w-xl leading-relaxed">
                   El restaurante medio pierde entre <strong className="text-[var(--text-primary)]">20.000€ y 30.000€ al año</strong> en desperdicio alimentario.
-                  Y desde abril de 2026, no tener el plan de prevención <strong className="text-red-400">también es una multa</strong>.
+                  Y desde abril de 2026, no tener el plan de prevención documentado <strong className="text-red-400">puede ser motivo de sanción</strong>.
                 </p>
 
                 <div className="mt-8 flex flex-col sm:flex-row gap-3">
@@ -395,7 +395,7 @@ export default async function HomePage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════════
-            OUTPUT — El documento que te salva de una multa
+            OUTPUT — El documento que exige la ley (Art. 5)
         ═══════════════════════════════════════════════════════════════ */}
         <section id="el-documento" className="py-20 bg-[var(--bg-secondary)]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -408,7 +408,7 @@ export default async function HomePage() {
 
               {/* Right: copy */}
               <FadeInOnScroll delay={150}>
-                <p className="text-sm font-semibold text-primary-500 uppercase tracking-wider mb-3">El documento que te protege</p>
+                <p className="text-sm font-semibold text-primary-500 uppercase tracking-wider mb-3">El documento que exige la ley</p>
                 <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] mb-5">
                   Si mañana viene una inspección,<br className="hidden sm:block" />
                   <span className="text-primary-500">¿qué les enseñas?</span>
@@ -492,10 +492,10 @@ export default async function HomePage() {
                 },
                 {
                   icon: '🛡️',
-                  title: 'Evitas multas',
-                  desc: 'Tienes el documento legal que te piden. Sin sorpresas en las inspecciones.',
-                  highlight: '0€',
-                  hlabel: 'en multas evitadas',
+                  title: 'Reduces el riesgo legal',
+                  desc: 'Tienes el plan documentado que exige el Art. 5. Demuestras diligencia activa ante cualquier inspección.',
+                  highlight: 'Art. 5',
+                  hlabel: 'Ley 1/2025 cubierto',
                   color: 'emerald',
                 },
                 {
@@ -550,7 +550,7 @@ export default async function HomePage() {
               {[
                 { val: '20–30%', label: 'Reducción media de mermas en los primeros 90 días' },
                 { val: '5.000€', label: 'Ahorro medio anual por local tras el primer año' },
-                { val: '0€', label: 'Multas recibidas por usuarios con plan activo en MermaLegal' },
+                { val: 'Art. 5', label: 'El artículo que exige el plan documentado. MermaLegal lo genera automáticamente.' },
               ].map((s, i) => (
                 <FadeInOnScroll key={s.label} delay={i * 100}>
                   <div className="text-center">
@@ -571,10 +571,10 @@ export default async function HomePage() {
                   saving: 'Ahorra ~4.100€/año',
                 },
                 {
-                  quote: 'Me vino una inspección de Sanidad y pude enseñar el plan en el móvil. Sin MermaLegal no hubiera tenido nada.',
+                  quote: 'Me vino una inspección de Sanidad y pude enseñar el plan en el móvil. El inspector vio que teníamos todo documentado y la gestión activa. Sin MermaLegal no hubiera tenido nada que enseñar.',
                   name: 'Laura P.',
                   role: 'Gerente, hotel con restaurante · Valencia',
-                  saving: 'Multa de 2.000€ evitada',
+                  saving: 'Inspección con documentación completa',
                 },
                 {
                   quote: 'Antes pensaba que el desperdicio era inevitable. Ahora mis cocineros compiten por reducirlo. Ha cambiado la cultura.',
@@ -787,7 +787,7 @@ export default async function HomePage() {
       {/* ─── FOOTER ────────────────────────────────────────────────────── */}
       <footer className="border-t border-[var(--border-color)] bg-[var(--bg-primary)] py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-2 text-lg font-bold text-primary-600">
               <svg className="h-6 w-6" viewBox="0 0 32 32" fill="none">
                 <circle cx="16" cy="16" r="14" fill="#059669" opacity="0.15" />
@@ -797,7 +797,7 @@ export default async function HomePage() {
               MermaLegal
             </div>
             <p className="text-sm text-[var(--text-muted)]">
-              &copy; {new Date().getFullYear()} MermaLegal · Cumplimiento Ley 1/2025 contra el desperdicio alimentario
+              &copy; {new Date().getFullYear()} MermaLegal · Herramienta de apoyo a la Ley 1/2025
             </p>
             <div className="flex gap-6 text-sm text-[var(--text-muted)]">
               <a href="#" className="hover:text-primary-600 transition-colors">Privacidad</a>
@@ -805,6 +805,14 @@ export default async function HomePage() {
               <a href="#" className="hover:text-primary-600 transition-colors">Contacto</a>
             </div>
           </div>
+          {/* Aviso legal */}
+          <p className="text-xs text-[var(--text-muted)] text-center border-t border-[var(--border-color)] pt-5 max-w-4xl mx-auto">
+            MermaLegal es una herramienta de apoyo a la documentación y registro exigidos por la Ley 1/2025 de prevención del desperdicio alimentario.
+            Genera el Plan de Prevención previsto en el Art. 5 y facilita el registro de trazabilidad.
+            El cumplimiento efectivo de la ley depende de la implantación real de las medidas por parte de cada establecimiento.
+            MermaLegal no presta asesoramiento jurídico ni garantiza la exención de sanciones administrativas.
+            Ante dudas legales específicas, consulte con un profesional cualificado.
+          </p>
         </div>
       </footer>
     </div>
