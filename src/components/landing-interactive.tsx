@@ -1,249 +1,164 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 
-// ── Animated counter ──
-export function AnimatedCounter({ target, suffix = '', duration = 2000 }: { target: number; suffix?: string; duration?: number }) {
+// ── Animated counter ──────────────────────────────────────────────────────────
+export function AnimatedCounter({ target, suffix = '', prefix = '', duration = 2000 }: {
+  target: number; suffix?: string; prefix?: string; duration?: number;
+}) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const started = useRef(false);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !started.current) {
-          started.current = true;
-          const start = performance.now();
-          const animate = (now: number) => {
-            const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            setCount(Math.floor(eased * target));
-            if (progress < 1) requestAnimationFrame(animate);
-          };
-          requestAnimationFrame(animate);
-        }
-      },
-      { threshold: 0.3 }
-    );
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !started.current) {
+        started.current = true;
+        const start = performance.now();
+        const animate = (now: number) => {
+          const progress = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          setCount(Math.floor(eased * target));
+          if (progress < 1) requestAnimationFrame(animate);
+        };
+        requestAnimationFrame(animate);
+      }
+    }, { threshold: 0.3 });
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, [target, duration]);
 
   return (
     <div ref={ref} className="text-4xl sm:text-5xl font-bold text-primary-600 tabular-nums">
-      {count.toLocaleString('es-ES')}{suffix}
+      {prefix}{count.toLocaleString('es-ES')}{suffix}
     </div>
   );
 }
 
-// ── Urgency banner with live date ──
-export function UrgencyBanner() {
-  const [, setTick] = useState(0);
+// ── Loss Calculator (hero) ────────────────────────────────────────────────────
+export function LossCalculator({ ctaHref }: { ctaHref: string }) {
+  const [clientes, setClientes] = useState('');
+  const [ticket, setTicket] = useState('');
 
-  useEffect(() => {
-    const interval = setInterval(() => setTick((t) => t + 1), 60000);
-    return () => clearInterval(interval);
-  }, []);
+  const clientesNum = parseFloat(clientes) || 0;
+  const ticketNum = parseFloat(ticket) || 0;
+  const hasValues = clientesNum > 0 && ticketNum > 0;
 
-  const lawDate = new Date('2026-04-02T00:00:00');
-  const now = new Date();
-  const isActive = now >= lawDate;
+  const revenue = clientesNum * ticketNum * 365;
+  const annualLoss = Math.round(revenue * 0.07);
+  const monthlyLoss = Math.round(annualLoss / 12);
+  const potentialSaving = Math.round(annualLoss * 0.25);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border-2 border-red-500/30 bg-gradient-to-r from-red-950 to-orange-950 p-8 sm:p-10">
-      <div className="absolute top-0 right-0 w-40 h-40 bg-red-500/10 rounded-full blur-3xl" />
-      <div className="relative text-center">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <span className="relative flex h-3 w-3">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping" />
-            <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
-          </span>
-          <span className="text-sm font-bold text-red-400 uppercase tracking-wider">
-            {isActive ? 'Ley en vigor' : 'Cuenta atras'}
-          </span>
-        </div>
-        <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-          {isActive
-            ? 'La Ley 1/2025 ya esta en vigor'
-            : 'La Ley 1/2025 entra en vigor pronto'}
-        </h3>
-        <p className="text-red-200 text-lg max-w-2xl mx-auto">
-          {isActive
-            ? 'Desde el 2 de abril de 2026, todos los establecimientos de hosteleria estan obligados a cumplir con la normativa de desperdicio alimentario. Las multas pueden alcanzar los 500.000€.'
-            : 'Preparate antes de que entre en vigor. Las multas pueden alcanzar los 500.000€.'}
-        </p>
-        <div className="mt-6 grid grid-cols-3 gap-4 max-w-md mx-auto">
-          <div className="rounded-xl bg-white/10 backdrop-blur p-4 text-center">
-            <div className="text-3xl font-bold text-white">2.000€</div>
-            <div className="text-xs text-red-300 mt-1">Multa minima</div>
-          </div>
-          <div className="rounded-xl bg-white/10 backdrop-blur p-4 text-center">
-            <div className="text-3xl font-bold text-white">60.000€</div>
-            <div className="text-xs text-red-300 mt-1">Infraccion grave</div>
-          </div>
-          <div className="rounded-xl bg-white/10 backdrop-blur p-4 text-center">
-            <div className="text-3xl font-bold text-white">500.000€</div>
-            <div className="text-xs text-red-300 mt-1">Multa maxima</div>
-          </div>
-        </div>
+    <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl overflow-hidden">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-red-950 to-red-900 px-6 py-4 flex items-center gap-3">
+        <span className="relative flex h-3 w-3">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping" />
+          <span className="relative inline-flex h-3 w-3 rounded-full bg-red-400" />
+        </span>
+        <span className="text-sm font-bold text-red-100 uppercase tracking-wider">
+          Calculadora de pérdidas — Ley 1/2025
+        </span>
       </div>
-    </div>
-  );
-}
 
-// ── Interactive demo preview ──
-export function DemoPreview() {
-  const [activeStep, setActiveStep] = useState(0);
-  const steps = [
-    {
-      title: 'Selecciona categoria',
-      desc: 'Toca el tipo de alimento',
-      content: (
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { emoji: '🍞', label: 'Panaderia', active: true },
-            { emoji: '🥩', label: 'Proteina', active: false },
-            { emoji: '🧀', label: 'Lacteos', active: false },
-            { emoji: '🥦', label: 'Verdura', active: false },
-            { emoji: '🍲', label: 'Preparados', active: false },
-            { emoji: '📦', label: 'Otros', active: false },
-          ].map((cat) => (
-            <div
-              key={cat.label}
-              className={`rounded-xl p-3 text-center transition-all cursor-pointer ${
-                cat.active
-                  ? 'bg-amber-100 dark:bg-amber-900 border-2 border-primary-500 scale-105'
-                  : 'bg-[var(--bg-tertiary)] border-2 border-transparent opacity-60'
-              }`}
-            >
-              <div className="text-2xl">{cat.emoji}</div>
-              <div className="text-[10px] font-bold mt-1">{cat.label}</div>
-            </div>
-          ))}
-        </div>
-      ),
-    },
-    {
-      title: 'Indica el peso',
-      desc: 'Botones grandes, sin teclear',
-      content: (
+      <div className="p-6 space-y-5">
         <div className="space-y-4">
-          <div className="flex items-center justify-center rounded-xl bg-[var(--bg-tertiary)] p-4">
-            <span className="text-4xl font-bold text-[var(--text-primary)] tabular-nums">2.5</span>
-            <span className="ml-2 text-xl text-[var(--text-muted)]">kg</span>
-          </div>
-          <div className="grid grid-cols-4 gap-2">
-            {[0.5, 1, 2, 5].map((v) => (
-              <div
-                key={v}
-                className={`rounded-lg border-2 py-3 text-center text-sm font-bold ${
-                  v === 2
-                    ? 'border-primary-600 bg-primary-50 dark:bg-primary-950 text-primary-700'
-                    : 'border-[var(--border-color)] text-[var(--text-secondary)]'
-                }`}
-              >
-                {v} kg
-              </div>
-            ))}
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Elige destino',
-      desc: 'Conforme a la jerarquia legal',
-      content: (
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { emoji: '❤️', label: 'Donacion', bg: 'bg-emerald-100 dark:bg-emerald-900', active: false },
-            { emoji: '🌱', label: 'Compost', bg: 'bg-lime-100 dark:bg-lime-900', active: true },
-            { emoji: '🐄', label: 'Pienso', bg: 'bg-orange-100 dark:bg-orange-900', active: false },
-            { emoji: '🗑️', label: 'Destruccion', bg: 'bg-red-100 dark:bg-red-900', active: false },
-          ].map((dest) => (
-            <div
-              key={dest.label}
-              className={`rounded-xl p-4 text-center ${dest.bg} ${
-                dest.active ? 'border-2 border-primary-500 scale-105' : 'border-2 border-transparent opacity-60'
-              } transition-all cursor-pointer`}
-            >
-              <div className="text-2xl">{dest.emoji}</div>
-              <div className="text-xs font-bold mt-1">{dest.label}</div>
+          <div>
+            <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+              Clientes por día (aprox.)
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">👤</span>
+              <input
+                type="number"
+                value={clientes}
+                onChange={(e) => setClientes(e.target.value)}
+                placeholder="Ej: 80"
+                min="1"
+                className="w-full rounded-xl border-2 border-[var(--border-color)] bg-[var(--bg-primary)] pl-10 pr-4 py-3.5 text-lg font-semibold text-[var(--text-primary)] focus:border-red-400 focus:outline-none transition-colors"
+              />
             </div>
-          ))}
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+              Ticket medio por cliente (€)
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">€</span>
+              <input
+                type="number"
+                value={ticket}
+                onChange={(e) => setTicket(e.target.value)}
+                placeholder="Ej: 22"
+                min="1"
+                className="w-full rounded-xl border-2 border-[var(--border-color)] bg-[var(--bg-primary)] pl-10 pr-4 py-3.5 text-lg font-semibold text-[var(--text-primary)] focus:border-red-400 focus:outline-none transition-colors"
+              />
+            </div>
+          </div>
         </div>
-      ),
-    },
-  ];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveStep((s) => (s + 1) % steps.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [steps.length]);
+        {/* Result */}
+        {hasValues ? (
+          <div className="rounded-xl bg-red-950 border border-red-800 p-5 space-y-4">
+            <div className="text-center">
+              <p className="text-sm text-red-300 mb-1">Estás perdiendo aproximadamente</p>
+              <p className="text-4xl font-bold text-white tabular-nums">
+                {annualLoss.toLocaleString('es-ES')}€
+              </p>
+              <p className="text-sm text-red-400 mt-1">al año en desperdicio alimentario</p>
+            </div>
+            <div className="h-px bg-red-800" />
+            <div className="grid grid-cols-2 gap-3 text-center text-sm">
+              <div>
+                <p className="text-red-400 text-xs">Pérdida mensual</p>
+                <p className="font-bold text-white text-lg">{monthlyLoss.toLocaleString('es-ES')}€</p>
+              </div>
+              <div>
+                <p className="text-emerald-400 text-xs">Podrías recuperar</p>
+                <p className="font-bold text-emerald-300 text-lg">{potentialSaving.toLocaleString('es-ES')}€</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] p-5 text-center">
+            <p className="text-[var(--text-muted)] text-sm">
+              Introduce tus datos para ver cuánto estás perdiendo
+            </p>
+            <div className="mt-3 text-3xl font-bold text-[var(--text-primary)] opacity-25">_ _ . _ _ _€</div>
+          </div>
+        )}
 
-  return (
-    <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-6 shadow-xl max-w-sm mx-auto">
-      {/* Phone frame header */}
-      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[var(--border-color)]">
-        <div className="h-3 w-3 rounded-full bg-red-400" />
-        <div className="h-3 w-3 rounded-full bg-yellow-400" />
-        <div className="h-3 w-3 rounded-full bg-green-400" />
-        <span className="ml-2 text-xs text-[var(--text-muted)]">mermalegal.vercel.app</span>
-      </div>
-
-      {/* Step indicator */}
-      <div className="flex gap-1.5 mb-4">
-        {steps.map((_, i) => (
-          <div
-            key={i}
-            className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
-              i <= activeStep ? 'bg-primary-600' : 'bg-[var(--bg-tertiary)]'
-            }`}
-          />
-        ))}
-      </div>
-
-      <div className="mb-3">
-        <h4 className="font-bold text-[var(--text-primary)]">{steps[activeStep].title}</h4>
-        <p className="text-xs text-[var(--text-muted)]">{steps[activeStep].desc}</p>
-      </div>
-
-      <div className="transition-all duration-300">
-        {steps[activeStep].content}
-      </div>
-
-      {/* Step dots */}
-      <div className="flex justify-center gap-2 mt-4">
-        {steps.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setActiveStep(i)}
-            className={`h-2 rounded-full transition-all ${
-              i === activeStep ? 'w-6 bg-primary-600' : 'w-2 bg-[var(--bg-tertiary)]'
-            }`}
-          />
-        ))}
+        <Link
+          href={ctaHref}
+          className="block w-full rounded-xl bg-primary-600 py-4 text-center text-base font-bold text-white hover:bg-primary-700 transition-colors"
+        >
+          {hasValues ? `Recuperar ${potentialSaving.toLocaleString('es-ES')}€ gratis →` : 'Ver mi pérdida exacta — gratis →'}
+        </Link>
+        <p className="text-center text-xs text-[var(--text-muted)]">
+          Sin tarjeta. Tu primer local es gratis.
+        </p>
       </div>
     </div>
   );
 }
 
-// ── Scroll-triggered fade in ──
-export function FadeInOnScroll({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+// ── Scroll-triggered fade in ──────────────────────────────────────────────────
+export function FadeInOnScroll({ children, className = '', delay = 0 }: {
+  children: React.ReactNode; className?: string; delay?: number;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setVisible(true), delay);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => setVisible(true), delay);
+        observer.disconnect();
+      }
+    }, { threshold: 0.1 });
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, [delay]);
@@ -251,11 +166,93 @@ export function FadeInOnScroll({ children, className = '', delay = 0 }: { childr
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ${
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      } ${className}`}
+      className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${className}`}
     >
       {children}
+    </div>
+  );
+}
+
+// ── PDF Document mock ─────────────────────────────────────────────────────────
+export function PDFMock() {
+  return (
+    <div className="relative mx-auto max-w-sm">
+      {/* Shadow layers for depth */}
+      <div className="absolute inset-0 translate-x-2 translate-y-2 rounded-xl bg-gray-800 opacity-30" />
+      <div className="absolute inset-0 translate-x-1 translate-y-1 rounded-xl bg-gray-700 opacity-20" />
+
+      {/* Main document */}
+      <div className="relative rounded-xl bg-white text-gray-900 shadow-2xl overflow-hidden text-[11px]">
+        {/* Header */}
+        <div className="bg-emerald-700 px-5 py-3 flex items-center justify-between">
+          <div>
+            <p className="text-white font-bold text-sm">PLAN DE PREVENCIÓN</p>
+            <p className="text-emerald-200 text-[10px]">Art. 5 — Ley 1/2025</p>
+          </div>
+          <div className="text-right">
+            <p className="text-emerald-200 text-[10px]">Generado por</p>
+            <p className="text-white font-bold text-xs">MermaLegal®</p>
+          </div>
+        </div>
+
+        <div className="px-5 py-4 space-y-3">
+          {/* Company */}
+          <div className="pb-2 border-b border-gray-100">
+            <p className="text-gray-400 text-[9px] uppercase tracking-wider">Establecimiento</p>
+            <p className="font-bold text-sm text-gray-800">Restaurante El Ejemplo, S.L.</p>
+            <p className="text-gray-500 text-[10px]">Responsable: Juan García · Jefe de cocina</p>
+          </div>
+
+          {/* KPIs */}
+          <div>
+            <p className="text-gray-400 text-[9px] uppercase tracking-wider mb-1.5">KPIs — Últimas 4 semanas</p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                { label: 'Merma total', val: '62,4 kg', color: 'bg-red-50 text-red-700' },
+                { label: 'Coste merma', val: '487€', color: 'bg-orange-50 text-orange-700' },
+                { label: 'Donado', val: '18,2 kg', color: 'bg-green-50 text-green-700' },
+              ].map((k) => (
+                <div key={k.label} className={`rounded-lg p-2 text-center ${k.color}`}>
+                  <p className="font-bold text-sm">{k.val}</p>
+                  <p className="text-[8px] leading-tight mt-0.5">{k.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Measures */}
+          <div>
+            <p className="text-gray-400 text-[9px] uppercase tracking-wider mb-1.5">Medidas de prevención activas</p>
+            <ul className="space-y-1">
+              {[
+                'Rotación FIFO en cámaras frigoríficas',
+                'Ajuste de pedidos según demanda real',
+                'Registro diario con trazabilidad completa',
+                'Donación semanal a banco de alimentos',
+                'Formación continua del personal',
+              ].map((m) => (
+                <li key={m} className="flex items-start gap-1.5">
+                  <svg className="h-3 w-3 text-emerald-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700">{m}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Footer stamp */}
+          <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
+            <p className="text-gray-400 text-[9px]">Generado el 4 de abril de 2026</p>
+            <div className="flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5">
+              <svg className="h-2.5 w-2.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="text-[9px] font-semibold text-emerald-700">Conforme Ley 1/2025</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
