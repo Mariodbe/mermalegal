@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/dashboard/', '/api/', '/auth/'],
     },
-    sitemap: 'https://mermalegal.vercel.app/sitemap.xml',
+    sitemap: 'https://mermalegal.com/sitemap.xml',
   };
 }
