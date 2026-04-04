@@ -83,30 +83,36 @@ function WasteFormModal({ locations, onClose }: { locations: Location[]; onClose
     if (!locationId || !category || !destination || weight <= 0) return;
     setSaving(true);
     setError(null);
-    const res = await fetch('/api/waste-entries', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location_id: locationId,
-        category,
-        weight_kg: weight,
-        destination,
-        notes: notes.trim() || null,
-        recorded_at: new Date().toISOString(),
-      }),
-    });
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      if (res.status === 403) {
-        setError(body.error ?? 'Has alcanzado el límite del plan gratuito. Actualiza a Pro para continuar.');
-      } else {
-        setError(body.error ?? 'Error al guardar el registro.');
+    try {
+      const res = await fetch('/api/waste-entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location_id: locationId,
+          category,
+          weight_kg: weight,
+          destination,
+          notes: notes.trim() || null,
+          recorded_at: new Date().toISOString(),
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        if (res.status === 403) {
+          setError(body.error ?? 'Has alcanzado el límite del plan gratuito. Actualiza a Pro para continuar.');
+        } else {
+          setError(body.error ?? 'Error al guardar el registro.');
+        }
+        setSaving(false);
+        return;
       }
       setSaving(false);
-      return;
+      router.refresh();
+      onClose();
+    } catch {
+      setError('Error de conexión. Por favor, inténtalo de nuevo.');
+      setSaving(false);
     }
-    router.refresh();
-    onClose();
   }
 
   const stepOrder: Step[] = locations.length > 1
