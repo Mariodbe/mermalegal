@@ -9,47 +9,42 @@ import {
   type Location,
   WASTE_CATEGORY_LABELS,
   DESTINATION_LABELS,
-  getWasteColor,
-  getDestinationColor,
 } from '@/lib/types';
 
-// ── Colors for category tiles ──
-const CATEGORY_BG: Record<WasteCategory, string> = {
-  bakery: 'bg-amber-100 dark:bg-amber-900 border-amber-300 dark:border-amber-700',
-  protein: 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700',
-  dairy: 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700',
-  produce: 'bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700',
-  prepared: 'bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700',
-  other: 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600',
-};
+// ── Category config ──────────────────────────────────────────────────────────
+const CATEGORIES: {
+  id: WasteCategory;
+  icon: string;
+  iconBg: string;       // circle behind emoji (light + dark)
+  selBg: string;        // card bg when selected
+  selBorder: string;    // card border when selected
+}[] = [
+  { id: 'produce',  icon: '🥦', iconBg: 'bg-green-100  dark:bg-green-900',  selBg: 'bg-green-50  dark:bg-green-950',  selBorder: 'border-green-500'  },
+  { id: 'protein',  icon: '🥩', iconBg: 'bg-red-100    dark:bg-red-900',    selBg: 'bg-red-50    dark:bg-red-950',    selBorder: 'border-red-500'    },
+  { id: 'bakery',   icon: '🍞', iconBg: 'bg-amber-100  dark:bg-amber-900',  selBg: 'bg-amber-50  dark:bg-amber-950',  selBorder: 'border-amber-500'  },
+  { id: 'dairy',    icon: '🧀', iconBg: 'bg-blue-100   dark:bg-blue-900',   selBg: 'bg-blue-50   dark:bg-blue-950',   selBorder: 'border-blue-500'   },
+  { id: 'prepared', icon: '🍲', iconBg: 'bg-purple-100 dark:bg-purple-900', selBg: 'bg-purple-50 dark:bg-purple-950', selBorder: 'border-purple-500' },
+  { id: 'other',    icon: '📦', iconBg: 'bg-gray-100   dark:bg-gray-700',   selBg: 'bg-gray-50   dark:bg-gray-800',   selBorder: 'border-gray-500'   },
+];
 
-const CATEGORY_ICONS: Record<WasteCategory, string> = {
-  bakery: '🍞',
-  protein: '🥩',
-  dairy: '🧀',
-  produce: '🥦',
-  prepared: '🍲',
-  other: '📦',
-};
+const DESTINATIONS: {
+  id: WasteDestination;
+  icon: string;
+  label: string;
+  desc: string;
+  iconBg: string;
+  selBg: string;
+  selBorder: string;
+}[] = [
+  { id: 'donation',    icon: '❤️',  label: 'Donación',    desc: 'Banco de alimentos', iconBg: 'bg-emerald-100 dark:bg-emerald-900', selBg: 'bg-emerald-50 dark:bg-emerald-950', selBorder: 'border-emerald-500' },
+  { id: 'compost',     icon: '🌱',  label: 'Compost',      desc: 'Residuo orgánico',   iconBg: 'bg-lime-100    dark:bg-lime-900',    selBg: 'bg-lime-50    dark:bg-lime-950',    selBorder: 'border-lime-500'    },
+  { id: 'animal_feed', icon: '🐄',  label: 'Pienso',       desc: 'Alimentación animal',iconBg: 'bg-orange-100  dark:bg-orange-900',  selBg: 'bg-orange-50  dark:bg-orange-950',  selBorder: 'border-orange-500'  },
+  { id: 'destruction', icon: '🗑️', label: 'Destrucción',  desc: 'Residuo no apto',    iconBg: 'bg-red-100     dark:bg-red-900',     selBg: 'bg-red-50     dark:bg-red-950',     selBorder: 'border-red-500'     },
+];
 
-const DESTINATION_BG: Record<WasteDestination, string> = {
-  donation: 'bg-emerald-100 dark:bg-emerald-900 border-emerald-300 dark:border-emerald-700',
-  compost: 'bg-lime-100 dark:bg-lime-900 border-lime-300 dark:border-lime-700',
-  animal_feed: 'bg-orange-100 dark:bg-orange-900 border-orange-300 dark:border-orange-700',
-  destruction: 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700',
-};
-
-const DESTINATION_ICONS: Record<WasteDestination, string> = {
-  donation: '❤️',
-  compost: '🌱',
-  animal_feed: '🐄',
-  destruction: '🗑️',
-};
-
-// ── Trigger button (exported for use in dashboard page) ──
+// ── Trigger ───────────────────────────────────────────────────────────────────
 export function WasteFormTrigger({ locations }: { locations: Location[] }) {
   const [isOpen, setIsOpen] = useState(false);
-
   return (
     <>
       <button
@@ -62,36 +57,24 @@ export function WasteFormTrigger({ locations }: { locations: Location[] }) {
         </svg>
         Registrar merma
       </button>
-
-      {isOpen && (
-        <WasteFormModal
-          locations={locations}
-          onClose={() => setIsOpen(false)}
-        />
-      )}
+      {isOpen && <WasteFormModal locations={locations} onClose={() => setIsOpen(false)} />}
     </>
   );
 }
 
-// ── Steps ──
+// ── Modal ─────────────────────────────────────────────────────────────────────
 type Step = 'location' | 'category' | 'weight' | 'destination' | 'notes';
 
-function WasteFormModal({
-  locations,
-  onClose,
-}: {
-  locations: Location[];
-  onClose: () => void;
-}) {
+function WasteFormModal({ locations, onClose }: { locations: Location[]; onClose: () => void }) {
   const router = useRouter();
-  const [step, setStep] = useState<Step>(locations.length > 1 ? 'location' : 'category');
-  const [locationId, setLocationId] = useState(locations.length === 1 ? locations[0]?.id ?? '' : '');
-  const [category, setCategory] = useState<WasteCategory | null>(null);
-  const [weight, setWeight] = useState(0);
+  const [step,        setStep]        = useState<Step>(locations.length > 1 ? 'location' : 'category');
+  const [locationId,  setLocationId]  = useState(locations.length === 1 ? locations[0]?.id ?? '' : '');
+  const [category,    setCategory]    = useState<WasteCategory | null>(null);
+  const [weight,      setWeight]      = useState(0);
   const [destination, setDestination] = useState<WasteDestination | null>(null);
-  const [notes, setNotes] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [notes,       setNotes]       = useState('');
+  const [saving,      setSaving]      = useState(false);
+  const [error,       setError]       = useState<string | null>(null);
 
   const addWeight = useCallback((delta: number) => {
     setWeight((prev) => Math.max(0, +(prev + delta).toFixed(1)));
@@ -101,10 +84,8 @@ function WasteFormModal({
     if (!locationId || !category || !destination || weight <= 0) return;
     setSaving(true);
     setError(null);
-
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-
     const { error: insertError } = await supabase.from('waste_entries').insert({
       location_id: locationId,
       category,
@@ -114,13 +95,7 @@ function WasteFormModal({
       recorded_by: user?.email ?? 'unknown',
       recorded_at: new Date().toISOString(),
     });
-
-    if (insertError) {
-      setError(insertError.message);
-      setSaving(false);
-      return;
-    }
-
+    if (insertError) { setError(insertError.message); setSaving(false); return; }
     router.refresh();
     onClose();
   }
@@ -128,267 +103,258 @@ function WasteFormModal({
   const stepOrder: Step[] = locations.length > 1
     ? ['location', 'category', 'weight', 'destination', 'notes']
     : ['category', 'weight', 'destination', 'notes'];
-
   const currentIdx = stepOrder.indexOf(step);
-  const canGoBack = currentIdx > 0;
 
-  function goBack() {
-    if (canGoBack) setStep(stepOrder[currentIdx - 1]);
-  }
+  const catCfg  = CATEGORIES.find((c) => c.id === category);
+  const destCfg = DESTINATIONS.find((d) => d.id === destination);
+
+  // Shared icon button style for back / close
+  const iconBtn = 'flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors active:scale-95 shadow-sm';
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl p-6 animate-fade-in-up">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            {canGoBack && (
-              <button
-                onClick={goBack}
-                className="focus-ring flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--bg-tertiary)] text-[var(--text-secondary)] active:scale-95 transition-transform"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-            )}
-            <h2 className="text-xl font-bold text-[var(--text-primary)]">Registrar merma</h2>
+      {/* Card */}
+      <div className="relative w-full max-w-md max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white dark:bg-[#1e293b] shadow-2xl border border-gray-100 dark:border-gray-700 animate-fade-in-up">
+
+
+        <div className="p-5">
+
+          {/* ── Header ── */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              {currentIdx > 0 && (
+                <button onClick={() => setStep(stepOrder[currentIdx - 1])} className={iconBtn}>
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              )}
+              <div>
+                <p className="font-bold text-gray-900 dark:text-gray-100 text-base leading-tight">Registrar merma</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">Paso {currentIdx + 1} de {stepOrder.length}</p>
+              </div>
+            </div>
+            <button onClick={onClose} className={iconBtn}>
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="focus-ring flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--bg-tertiary)] text-[var(--text-secondary)] active:scale-95 transition-transform"
-          >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
 
-        {/* Progress */}
-        <div className="flex gap-1.5 mb-6">
-          {stepOrder.map((s, i) => (
-            <div
-              key={s}
-              className={`h-1.5 flex-1 rounded-full transition-colors ${
-                i <= currentIdx ? 'bg-primary-600' : 'bg-[var(--bg-tertiary)]'
-              }`}
-            />
-          ))}
-        </div>
-
-        {error && (
-          <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 p-3 text-sm text-red-700 dark:text-red-300">
-            {error}
+          {/* ── Progress ── */}
+          <div className="flex gap-1 mb-5">
+            {stepOrder.map((s, i) => (
+              <div key={s} className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                i < currentIdx   ? 'bg-primary-300 dark:bg-primary-700' :
+                i === currentIdx ? 'bg-primary-600' :
+                'bg-gray-100 dark:bg-gray-700'
+              }`} />
+            ))}
           </div>
-        )}
 
-        {/* ── STEP: Location ── */}
-        {step === 'location' && (
-          <div>
-            <p className="text-sm text-[var(--text-secondary)] mb-4">Selecciona el local</p>
-            <div className="grid grid-cols-1 gap-3">
+          {error && (
+            <div className="mb-4 rounded-xl bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 p-3 text-sm text-red-700 dark:text-red-300">
+              {error}
+            </div>
+          )}
+
+          {/* ── LOCATION ── */}
+          {step === 'location' && (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">¿En qué local?</p>
               {locations.map((loc) => (
                 <button
                   key={loc.id}
-                  onClick={() => {
-                    setLocationId(loc.id);
-                    setStep('category');
-                  }}
-                  className={`focus-ring flex items-center gap-3 rounded-2xl border-2 p-5 text-left transition-all active:scale-[0.98] ${
+                  onClick={() => { setLocationId(loc.id); setStep('category'); }}
+                  className={`w-full flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] ${
                     locationId === loc.id
-                      ? 'border-primary-600 bg-primary-50 dark:bg-primary-950'
-                      : 'border-[var(--border-color)] hover:border-primary-300'
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-950'
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:border-primary-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
-                  style={{ minHeight: '64px' }}
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900 text-xl">
-                    🏪
-                  </div>
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900 text-xl">🏪</div>
                   <div>
-                    <p className="font-semibold text-[var(--text-primary)]">{loc.name}</p>
-                    <p className="text-sm text-[var(--text-muted)]">{loc.address}</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{loc.name}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">{loc.address}</p>
                   </div>
                 </button>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ── STEP: Category ── */}
-        {step === 'category' && (
-          <div>
-            <p className="text-sm text-[var(--text-secondary)] mb-4">Tipo de alimento</p>
-            <div className="grid grid-cols-2 gap-3">
-              {(Object.keys(WASTE_CATEGORY_LABELS) as WasteCategory[]).map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => {
-                    setCategory(cat);
-                    setStep('weight');
-                  }}
-                  className={`focus-ring flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-5 transition-all active:scale-[0.96] ${
-                    category === cat
-                      ? 'border-primary-600 ring-2 ring-primary-600/30'
-                      : 'border-transparent'
-                  } ${CATEGORY_BG[cat]}`}
-                  style={{ minHeight: '100px' }}
-                >
-                  <span className="text-3xl">{CATEGORY_ICONS[cat]}</span>
-                  <span className="text-sm font-bold text-[var(--text-primary)]">
-                    {WASTE_CATEGORY_LABELS[cat]}
-                  </span>
-                </button>
-              ))}
+          {/* ── CATEGORY ── */}
+          {step === 'category' && (
+            <div>
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">¿Qué tipo de alimento?</p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {CATEGORIES.map(({ id, icon, iconBg, selBg, selBorder }) => {
+                  const sel = category === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => { setCategory(id); setStep('weight'); }}
+                      className={`focus-ring flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 p-4 transition-all active:scale-[0.96] hover:shadow-sm ${
+                        sel
+                          ? `${selBorder} ${selBg}`
+                          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}
+                      style={{ minHeight: '88px' }}
+                    >
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${sel ? iconBg : iconBg}`}>
+                        {icon}
+                      </div>
+                      <span className={`text-xs font-bold ${sel ? 'text-gray-800 dark:text-gray-100' : 'text-gray-600 dark:text-gray-300'}`}>
+                        {WASTE_CATEGORY_LABELS[id]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ── STEP: Weight ── */}
-        {step === 'weight' && (
-          <div>
-            <p className="text-sm text-[var(--text-secondary)] mb-4">Peso (kg)</p>
+          {/* ── WEIGHT ── */}
+          {step === 'weight' && (
+            <div>
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">¿Cuánto pesa?</p>
 
-            {/* Big display */}
-            <div className="mb-6 flex items-center justify-center rounded-2xl bg-[var(--bg-tertiary)] p-6">
-              <span className="text-5xl font-bold text-[var(--text-primary)] tabular-nums">
-                {weight.toFixed(1)}
-              </span>
-              <span className="ml-2 text-2xl text-[var(--text-muted)]">kg</span>
-            </div>
-
-            {/* Quick buttons */}
-            <div className="grid grid-cols-4 gap-3 mb-4">
-              {[0.5, 1, 2, 5].map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setWeight(v)}
-                  className={`focus-ring rounded-xl border-2 py-4 text-lg font-bold transition-all active:scale-95 ${
-                    weight === v
-                      ? 'border-primary-600 bg-primary-50 dark:bg-primary-950 text-primary-700 dark:text-primary-300'
-                      : 'border-[var(--border-color)] text-[var(--text-primary)] hover:border-primary-300'
-                  }`}
-                  style={{ minHeight: '56px' }}
-                >
-                  {v} kg
-                </button>
-              ))}
-            </div>
-
-            {/* +/- controls */}
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <button
-                onClick={() => addWeight(-1)}
-                className="focus-ring flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 text-2xl font-bold active:scale-90 transition-transform"
-              >
-                -1
-              </button>
-              <button
-                onClick={() => addWeight(-0.5)}
-                className="focus-ring flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950 text-red-500 dark:text-red-400 text-xl font-bold active:scale-90 transition-transform"
-              >
-                -0.5
-              </button>
-              <button
-                onClick={() => addWeight(0.5)}
-                className="focus-ring flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50 dark:bg-green-950 text-green-500 dark:text-green-400 text-xl font-bold active:scale-90 transition-transform"
-              >
-                +0.5
-              </button>
-              <button
-                onClick={() => addWeight(1)}
-                className="focus-ring flex h-16 w-16 items-center justify-center rounded-2xl bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 text-2xl font-bold active:scale-90 transition-transform"
-              >
-                +1
-              </button>
-            </div>
-
-            <button
-              onClick={() => weight > 0 && setStep('destination')}
-              disabled={weight <= 0}
-              className="focus-ring w-full rounded-xl bg-primary-600 py-4 text-lg font-bold text-white hover:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
-              style={{ minHeight: '56px' }}
-            >
-              Siguiente
-            </button>
-          </div>
-        )}
-
-        {/* ── STEP: Destination ── */}
-        {step === 'destination' && (
-          <div>
-            <p className="text-sm text-[var(--text-secondary)] mb-4">Destino de la merma</p>
-            <div className="grid grid-cols-2 gap-3">
-              {(Object.keys(DESTINATION_LABELS) as WasteDestination[]).map((dest) => (
-                <button
-                  key={dest}
-                  onClick={() => {
-                    setDestination(dest);
-                    setStep('notes');
-                  }}
-                  className={`focus-ring flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-5 transition-all active:scale-[0.96] ${
-                    destination === dest
-                      ? 'border-primary-600 ring-2 ring-primary-600/30'
-                      : 'border-transparent'
-                  } ${DESTINATION_BG[dest]}`}
-                  style={{ minHeight: '100px' }}
-                >
-                  <span className="text-3xl">{DESTINATION_ICONS[dest]}</span>
-                  <span className="text-sm font-bold text-[var(--text-primary)]">
-                    {DESTINATION_LABELS[dest]}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP: Notes + Save ── */}
-        {step === 'notes' && (
-          <div>
-            <p className="text-sm text-[var(--text-secondary)] mb-4">Notas (opcional)</p>
-
-            {/* Summary */}
-            <div className="mb-4 rounded-xl bg-[var(--bg-tertiary)] p-4 space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span className="text-[var(--text-muted)]">Categoria</span>
-                <span className="font-medium text-[var(--text-primary)]">
-                  {category ? `${CATEGORY_ICONS[category]} ${WASTE_CATEGORY_LABELS[category]}` : ''}
+              {/* Big display */}
+              <div className="flex items-baseline justify-center gap-2 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 py-5 px-4 mb-4">
+                <span className="text-6xl font-black tabular-nums text-gray-900 dark:text-gray-100 leading-none">
+                  {weight.toFixed(1)}
                 </span>
+                <span className="text-xl font-semibold text-gray-400 dark:text-gray-500 mb-1">kg</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-[var(--text-muted)]">Peso</span>
-                <span className="font-medium text-[var(--text-primary)]">{weight.toFixed(1)} kg</span>
+
+              {/* Presets */}
+              <div className="grid grid-cols-4 gap-2 mb-3">
+                {[0.5, 1, 2, 5].map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setWeight(v)}
+                    className={`focus-ring rounded-xl py-3 text-sm font-bold transition-all active:scale-95 ${
+                      weight === v
+                        ? 'bg-primary-600 text-white shadow-sm'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600'
+                    }`}
+                  >
+                    {v} kg
+                  </button>
+                ))}
               </div>
-              <div className="flex justify-between">
-                <span className="text-[var(--text-muted)]">Destino</span>
-                <span className="font-medium text-[var(--text-primary)]">
-                  {destination ? `${DESTINATION_ICONS[destination]} ${DESTINATION_LABELS[destination]}` : ''}
-                </span>
+
+              {/* +/- controls */}
+              <div className="grid grid-cols-4 gap-2 mb-4">
+                {([
+                  { delta: -1,   label: '−1',   cls: 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-200 dark:hover:bg-red-900'     },
+                  { delta: -0.5, label: '−½',   cls: 'bg-red-50  dark:bg-red-950/40 text-red-500 dark:text-red-500 border border-red-100 dark:border-red-900 hover:bg-red-100 dark:hover:bg-red-950'     },
+                  { delta: +0.5, label: '+½',   cls: 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border border-green-100 dark:border-green-900 hover:bg-green-100 dark:hover:bg-green-950' },
+                  { delta: +1,   label: '+1',   cls: 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 hover:bg-green-200 dark:hover:bg-green-900' },
+                ] as const).map(({ delta, label, cls }) => (
+                  <button
+                    key={delta}
+                    onClick={() => addWeight(delta)}
+                    className={`focus-ring rounded-xl py-3 text-sm font-bold transition-all active:scale-90 ${cls}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => weight > 0 && setStep('destination')}
+                disabled={weight <= 0}
+                className="focus-ring w-full rounded-xl bg-primary-600 py-3.5 text-base font-bold text-white hover:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+              >
+                Siguiente →
+              </button>
+            </div>
+          )}
+
+          {/* ── DESTINATION ── */}
+          {step === 'destination' && (
+            <div>
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">¿A dónde va?</p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {DESTINATIONS.map(({ id, icon, label, desc, iconBg, selBg, selBorder }) => {
+                  const sel = destination === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => { setDestination(id); setStep('notes'); }}
+                      className={`focus-ring flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-4 transition-all active:scale-[0.96] hover:shadow-sm ${
+                        sel
+                          ? `${selBorder} ${selBg}`
+                          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}
+                      style={{ minHeight: '96px' }}
+                    >
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${iconBg}`}>
+                        {icon}
+                      </div>
+                      <span className={`text-xs font-bold ${sel ? 'text-gray-800 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
+                        {label}
+                      </span>
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500 leading-tight text-center">
+                        {desc}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
+          )}
 
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ej: Sobras del servicio de mediodia..."
-              rows={3}
-              className="touch-input focus-ring w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] mb-4"
-            />
+          {/* ── NOTES + SAVE ── */}
+          {step === 'notes' && (
+            <div>
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Confirmar y guardar</p>
 
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="focus-ring w-full rounded-xl bg-primary-600 py-5 text-xl font-bold text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg"
-              style={{ minHeight: '64px' }}
-            >
-              {saving ? 'Guardando...' : 'Guardar registro'}
-            </button>
-          </div>
-        )}
+              {/* Summary */}
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden mb-4">
+                {[
+                  { label: 'Tipo',    value: catCfg  ? `${catCfg.icon}  ${WASTE_CATEGORY_LABELS[catCfg.id]}`   : '—' },
+                  { label: 'Peso',    value: `${weight.toFixed(1)} kg` },
+                  { label: 'Destino', value: destCfg ? `${destCfg.icon} ${destCfg.label}` : '—' },
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex items-center justify-between px-4 py-3">
+                    <span className="text-sm text-gray-400 dark:text-gray-500">{label}</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{value}</span>
+                  </div>
+                ))}
+              </div>
+
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Notas opcionales — ej: sobras del servicio de mediodía..."
+                rows={3}
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent mb-4 resize-none"
+              />
+
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="focus-ring w-full rounded-xl bg-primary-600 py-4 text-lg font-bold text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-sm"
+                style={{ minHeight: '56px' }}
+              >
+                {saving ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    Guardando...
+                  </span>
+                ) : '✓ Guardar registro'}
+              </button>
+            </div>
+          )}
+
+        </div>
       </div>
     </div>
   );

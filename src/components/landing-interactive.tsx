@@ -52,8 +52,8 @@ export function UrgencyBanner() {
   return (
     <div className="relative overflow-hidden rounded-2xl border-2 border-red-500/30 bg-gradient-to-r from-red-950 to-orange-950 p-8 sm:p-10">
       <div className="absolute top-0 right-0 w-40 h-40 bg-red-500/10 rounded-full blur-3xl" />
-      <div className="relative">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="relative text-center">
+        <div className="flex items-center justify-center gap-2 mb-4">
           <span className="relative flex h-3 w-3">
             <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping" />
             <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
@@ -67,7 +67,7 @@ export function UrgencyBanner() {
             ? 'La Ley 1/2025 ya esta en vigor'
             : 'La Ley 1/2025 entra en vigor pronto'}
         </h3>
-        <p className="text-red-200 text-lg max-w-2xl">
+        <p className="text-red-200 text-lg max-w-2xl mx-auto">
           {isActive
             ? 'Desde el 2 de abril de 2026, todos los establecimientos de hosteleria estan obligados a cumplir con la normativa de desperdicio alimentario. Las multas pueden alcanzar los 500.000€.'
             : 'Preparate antes de que entre en vigor. Las multas pueden alcanzar los 500.000€.'}
