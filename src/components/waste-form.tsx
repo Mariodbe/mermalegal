@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import {
   type WasteCategory,
   type WasteDestination,
@@ -84,18 +83,28 @@ function WasteFormModal({ locations, onClose }: { locations: Location[]; onClose
     if (!locationId || !category || !destination || weight <= 0) return;
     setSaving(true);
     setError(null);
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    const { error: insertError } = await supabase.from('waste_entries').insert({
-      location_id: locationId,
-      category,
-      weight_kg: weight,
-      destination,
-      notes: notes.trim() || null,
-      recorded_by: user?.email ?? 'unknown',
-      recorded_at: new Date().toISOString(),
+    const res = await fetch('/api/waste-entries', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location_id: locationId,
+        category,
+        weight_kg: weight,
+        destination,
+        notes: notes.trim() || null,
+        recorded_at: new Date().toISOString(),
+      }),
     });
-    if (insertError) { setError(insertError.message); setSaving(false); return; }
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      if (res.status === 403) {
+        setError(body.error ?? 'Has alcanzado el límite del plan gratuito. Actualiza a Pro para continuar.');
+      } else {
+        setError(body.error ?? 'Error al guardar el registro.');
+      }
+      setSaving(false);
+      return;
+    }
     router.refresh();
     onClose();
   }

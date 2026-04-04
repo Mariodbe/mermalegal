@@ -800,8 +800,8 @@ export default async function HomePage() {
               &copy; {new Date().getFullYear()} MermaLegal · Herramienta de apoyo a la Ley 1/2025
             </p>
             <div className="flex gap-6 text-sm text-[var(--text-muted)]">
-              <a href="#" className="hover:text-primary-600 transition-colors">Privacidad</a>
-              <a href="#" className="hover:text-primary-600 transition-colors">Términos</a>
+              <a href="/privacidad" className="hover:text-primary-600 transition-colors">Privacidad</a>
+              <a href="/terminos" className="hover:text-primary-600 transition-colors">Términos</a>
               <a href="#" className="hover:text-primary-600 transition-colors">Contacto</a>
             </div>
           </div>
