@@ -144,7 +144,7 @@ export default async function HomePage() {
                 <p className="mt-1.5 text-sm text-[var(--text-secondary)]">Restaurantes obligados por la ley</p>
               </div>
               <div>
-                <AnimatedCounter target={30000} prefix="hasta " suffix="€" />
+                <AnimatedCounter target={30000} suffix="€" />
                 <p className="mt-1.5 text-sm text-[var(--text-secondary)]">Pérdida media anual por local</p>
               </div>
               <div>
