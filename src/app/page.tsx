@@ -303,7 +303,7 @@ export default async function HomePage() {
             <FadeInOnScroll delay={300}>
               <div className="mt-10 rounded-2xl bg-primary-950 border border-primary-800 p-8 text-center max-w-3xl mx-auto">
                 <p className="text-primary-300 text-lg">
-                  El plan <strong className="text-white">Pro (49€/mes)</strong> cuesta menos que{' '}
+                  El plan <strong className="text-white">Pro (39€/mes)</strong> cuesta menos que{' '}
                   <strong className="text-white">2 días de merma</strong> en la mayoría de restaurantes.
                 </p>
                 <p className="text-primary-400 text-sm mt-2">
@@ -670,7 +670,7 @@ export default async function HomePage() {
                   <p className="text-xs font-semibold text-primary-500 uppercase tracking-wider mb-1">Para controlar y ahorrar</p>
                   <h3 className="text-lg font-bold text-[var(--text-primary)]">Pro</h3>
                   <div className="mt-2 flex items-baseline gap-1">
-                    <span className="text-4xl font-extrabold text-[var(--text-primary)]">49€</span>
+                    <span className="text-4xl font-extrabold text-[var(--text-primary)]">39€</span>
                     <span className="text-[var(--text-muted)] text-sm">/mes</span>
                   </div>
                   <p className="mt-1 text-sm text-[var(--text-muted)]">Hasta 5 locales</p>
@@ -695,7 +695,7 @@ export default async function HomePage() {
                     ))}
                   </ul>
                   <Link href="/auth/register" className="mt-6 block w-full rounded-lg bg-primary-600 py-3.5 text-center text-sm font-bold text-white hover:bg-primary-700 transition-colors">
-                    Empezar con Pro — 49€/mes
+                    Empezar con Pro — 39€/mes
                   </Link>
                 </div>
               </FadeInOnScroll>

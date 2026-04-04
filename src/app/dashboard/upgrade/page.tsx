@@ -30,7 +30,7 @@ function calcROI(profile: BusinessProfile) {
   const monthlySavingsLow  = Math.round(annualSavingsLow  / 12);
   const monthlySavingsHigh = Math.round(annualSavingsHigh / 12);
   const avgMonthlySavings = (monthlySavingsLow + monthlySavingsHigh) / 2;
-  const roiMonths = avgMonthlySavings > 0 ? Math.round((49 / avgMonthlySavings) * 10) / 10 : 3;
+  const roiMonths = avgMonthlySavings > 0 ? Math.round((39 / avgMonthlySavings) * 10) / 10 : 3;
 
   return {
     annualWasteLow,
@@ -54,7 +54,7 @@ const PLANS = [
     id: 'pro',
     dbPlan: 'pro' as const,
     name: 'Pro',
-    price: 49,
+    price: 39,
     badge: 'MÁS RENTABLE',
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID ?? process.env.NEXT_PUBLIC_STRIPE_CORE_PRICE_ID ?? '',
     cta: 'Empezar con Pro',
