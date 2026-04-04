@@ -1,30 +1,21 @@
-import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { LocationsManager } from '@/components/locations-manager';
-import type { Location, UserProfile } from '@/lib/types';
+import { getUser, getProfile, getLocations } from '@/lib/queries';
 
 export default async function LocationsPage() {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect('/auth/login');
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
-
-  const { data: locations } = await supabase
-    .from('locations')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('name');
+  // Ambas ya están en caché del layout — coste cero
+  const [profile, locations] = await Promise.all([
+    getProfile(),
+    getLocations(),
+  ]);
 
   return (
     <LocationsManager
-      initialLocations={(locations ?? []) as Location[]}
-      profile={profile as UserProfile}
+      initialLocations={locations}
+      profile={profile!}
     />
   );
 }

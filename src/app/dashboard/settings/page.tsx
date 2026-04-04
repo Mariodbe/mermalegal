@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ExternalLink } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { UserProfile } from '@/lib/types';
 import { PLAN_TIER_LABELS } from '@/lib/types';
@@ -18,6 +19,7 @@ export default function SettingsPage() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSaved, setPasswordSaved] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [openingPortal, setOpeningPortal] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -49,6 +51,17 @@ export default function SettingsPage() {
     setSaved(true);
     router.refresh();
     setTimeout(() => setSaved(false), 3000);
+  }
+
+  async function handleOpenPortal() {
+    setOpeningPortal(true);
+    const res = await fetch('/api/stripe/portal', { method: 'POST' });
+    const body = await res.json();
+    if (body.url) {
+      window.location.href = body.url;
+    } else {
+      setOpeningPortal(false);
+    }
   }
 
   async function handleChangePassword() {
@@ -153,6 +166,24 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
+
+      {/* Subscription */}
+      {profile.plan !== 'free' && (
+        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-6 shadow-sm space-y-4">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Suscripción</h2>
+          <p className="text-sm text-[var(--text-secondary)]">
+            Gestiona tu plan, método de pago y cancela cuando quieras desde el portal de facturación.
+          </p>
+          <button
+            onClick={handleOpenPortal}
+            disabled={openingPortal}
+            className="focus-ring inline-flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] disabled:opacity-50 transition-colors"
+          >
+            <ExternalLink className="h-4 w-4" />
+            {openingPortal ? 'Abriendo...' : 'Gestionar suscripción'}
+          </button>
+        </div>
+      )}
 
       {/* Change password */}
       <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-6 shadow-sm space-y-4">

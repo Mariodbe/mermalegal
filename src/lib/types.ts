@@ -79,7 +79,7 @@ export const LOCATION_TYPE_LABELS: Record<LocationType, string> = {
 export const PLAN_TIER_LABELS: Record<PlanTier, string> = {
   free: 'Gratis',
   pro: 'Pro',
-  enterprise: 'Enterprise',
+  enterprise: 'Business',
 };
 
 export const PLAN_LOCATION_LIMITS: Record<PlanTier, number> = {

@@ -2,40 +2,98 @@
 
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { ThemeToggle } from '@/components/theme-provider';
-import type { UserProfile, Location } from '@/lib/types';
+import type { UserProfile, Location, WasteEntry } from '@/lib/types';
 import { PLAN_TIER_LABELS, formatKg } from '@/lib/types';
 
 interface DashboardShellProps {
   profile: UserProfile;
   locations: Location[];
-  recentWasteCount: number;
-  totalWeekKg: number;
-  donatedKg: number;
   children: React.ReactNode;
+}
+
+interface WeekStats {
+  count: number;
+  totalKg: number;
+  donatedKg: number;
 }
 
 export function DashboardShell({
   profile,
   locations,
-  recentWasteCount,
-  totalWeekKg,
-  donatedKg,
   children,
 }: DashboardShellProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [notifOpen, setNotifOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const notifRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [menuOpen,  setMenuOpen]  = useState(false);
+  const notifRef    = useRef<HTMLDivElement>(null);
+  const menuRef     = useRef<HTMLDivElement>(null);
+  const notifBtnRef = useRef<HTMLButtonElement>(null);
+  const menuBtnRef  = useRef<HTMLButtonElement>(null);
+  const [notifPos, setNotifPos] = useState({ top: 68, right: 16 });
+  const [menuPos,  setMenuPos]  = useState({ top: 68, right: 16 });
+
+  // Estadísticas del panel — se cargan lazily solo al abrir el panel
+  const [stats, setStats]           = useState<WeekStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+
+  const loadStats = useCallback(async () => {
+    if (stats || statsLoading) return;
+    setStatsLoading(true);
+    try {
+      const supabase = createClient();
+      const locIds = locations.map((l) => l.id);
+      if (!locIds.length) { setStats({ count: 0, totalKg: 0, donatedKg: 0 }); return; }
+      const since = new Date();
+      since.setDate(since.getDate() - 7);
+      const { data } = await supabase
+        .from('waste_entries')
+        .select('weight_kg, destination')
+        .in('location_id', locIds)
+        .gte('recorded_at', since.toISOString());
+      const entries = (data ?? []) as Pick<WasteEntry, 'weight_kg' | 'destination'>[];
+      setStats({
+        count:     entries.length,
+        totalKg:   entries.reduce((s, e) => s + e.weight_kg, 0),
+        donatedKg: entries.filter((e) => e.destination === 'donation').reduce((s, e) => s + e.weight_kg, 0),
+      });
+    } finally {
+      setStatsLoading(false);
+    }
+  }, [stats, statsLoading, locations]);
+
+  const openNotif = useCallback(() => {
+    if (notifBtnRef.current) {
+      const r = notifBtnRef.current.getBoundingClientRect();
+      setNotifPos({ top: r.bottom + 8, right: window.innerWidth - r.right });
+    }
+    setMenuOpen(false);
+    const next = !notifOpen;
+    setNotifOpen(next);
+    if (next) loadStats();
+  }, [notifOpen, loadStats]);
+
+  const openMenu = useCallback(() => {
+    if (menuBtnRef.current) {
+      const r = menuBtnRef.current.getBoundingClientRect();
+      setMenuPos({ top: r.bottom + 8, right: window.innerWidth - r.right });
+    }
+    setNotifOpen(false);
+    setMenuOpen((v) => !v);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+      if (notifRef.current && !notifRef.current.contains(e.target as Node) &&
+          notifBtnRef.current && !notifBtnRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+      if (menuRef.current && !menuRef.current.contains(e.target as Node) &&
+          menuBtnRef.current && !menuBtnRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -49,9 +107,9 @@ export function DashboardShell({
   }
 
   const navItems = [
-    { href: '/dashboard', label: 'Inicio' },
+    { href: '/dashboard',           label: 'Inicio' },
     { href: '/dashboard/locations', label: 'Locales' },
-    { href: '/dashboard/plan', label: 'Plan prevencion' },
+    { href: '/dashboard/plan',      label: 'Plan prevencion' },
   ];
 
   return (
@@ -98,6 +156,21 @@ export function DashboardShell({
                 </svg>
                 Mejorar plan
               </Link>
+            ) : profile.plan === 'pro' ? (
+              <div className="hidden sm:flex items-center gap-2">
+                <span className="flex items-center rounded-full bg-primary-600 px-3 py-1 text-xs font-semibold text-white">
+                  Pro
+                </span>
+                <Link
+                  href="/dashboard/upgrade"
+                  className="flex items-center gap-1 rounded-full border border-primary-600 px-3 py-1 text-xs font-semibold text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-950 transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  Business
+                </Link>
+              </div>
             ) : (
               <span className="hidden sm:flex items-center rounded-full bg-primary-600 px-3 py-1 text-xs font-semibold text-white">
                 {PLAN_TIER_LABELS[profile.plan]}
@@ -105,50 +178,66 @@ export function DashboardShell({
             )}
 
             {/* Notifications */}
-            <div className="relative" ref={notifRef}>
+            <div>
               <button
-                onClick={() => setNotifOpen(!notifOpen)}
-                className="focus-ring relative rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                ref={notifBtnRef}
+                onClick={openNotif}
+                className="focus-ring relative rounded-lg p-2 hover:bg-[var(--bg-tertiary)] transition-colors"
                 aria-label="Notificaciones"
               >
                 <svg className="h-5 w-5 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
-                {recentWasteCount > 0 && (
+                {/* Badge — solo se muestra si ya cargamos y hay datos */}
+                {stats && stats.count > 0 && (
                   <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                    {recentWasteCount > 99 ? '99' : recentWasteCount}
+                    {stats.count > 99 ? '99' : stats.count}
                   </span>
                 )}
               </button>
 
               {notifOpen && (
-                <div className="absolute right-0 mt-2 w-72 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-lg p-4 z-50">
-                  <h3 className="font-semibold text-sm text-[var(--text-primary)] mb-3">Resumen semanal</h3>
-                  <div className="space-y-2 text-sm text-[var(--text-secondary)]">
-                    <div className="flex justify-between">
-                      <span>Registros esta semana</span>
-                      <span className="font-medium text-[var(--text-primary)]">{recentWasteCount}</span>
+                <div
+                  ref={notifRef}
+                  style={{ position: 'fixed', top: notifPos.top, right: notifPos.right, zIndex: 9999 }}
+                  className="w-72 rounded-xl bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-[#334155] shadow-2xl p-4"
+                >
+                  <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-3">Resumen semanal</h3>
+                  {statsLoading || !stats ? (
+                    <div className="space-y-2.5 animate-pulse">
+                      {[0,1,2].map((i) => (
+                        <div key={i} className="flex justify-between">
+                          <div className="h-3.5 w-32 rounded bg-gray-200 dark:bg-gray-700" />
+                          <div className="h-3.5 w-10 rounded bg-gray-200 dark:bg-gray-700" />
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex justify-between">
-                      <span>Total merma</span>
-                      <span className="font-medium text-[var(--text-primary)]">{formatKg(totalWeekKg)}</span>
+                  ) : (
+                    <div className="space-y-2.5 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400">Registros esta semana</span>
+                        <span className="font-bold text-gray-900 dark:text-gray-100">{stats.count}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400">Total merma</span>
+                        <span className="font-bold text-gray-900 dark:text-gray-100">{formatKg(stats.totalKg)}</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <span className="text-gray-600 dark:text-gray-400">Donado</span>
+                        <span className="font-bold text-primary-600">{formatKg(stats.donatedKg)}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Donado</span>
-                      <span className="font-medium text-primary-600">{formatKg(donatedKg)}</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
 
-            <ThemeToggle />
-
             {/* Settings / User menu */}
-            <div className="relative" ref={menuRef}>
+            <div>
               <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="focus-ring flex items-center gap-2 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                ref={menuBtnRef}
+                onClick={openMenu}
+                className="focus-ring flex items-center gap-2 rounded-lg p-2 hover:bg-[var(--bg-tertiary)] transition-colors"
               >
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-xs font-bold">
                   {(profile.company_name ?? profile.email)?.[0]?.toUpperCase() ?? 'U'}
@@ -156,16 +245,20 @@ export function DashboardShell({
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-lg py-2 z-50">
-                  <div className="px-4 py-2 border-b border-[var(--border-color)]">
-                    <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                <div
+                  ref={menuRef}
+                  style={{ position: 'fixed', top: menuPos.top, right: menuPos.right, zIndex: 9999 }}
+                  className="w-56 rounded-xl bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-[#334155] shadow-2xl py-2"
+                >
+                  <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                       {profile.company_name ?? 'Mi empresa'}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)] truncate">{profile.email}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{profile.email}</p>
                   </div>
                   <Link
                     href="/dashboard/settings"
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     onClick={() => setMenuOpen(false)}
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -176,7 +269,7 @@ export function DashboardShell({
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-[var(--bg-tertiary)] transition-colors"
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

@@ -1,53 +1,31 @@
-import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { DashboardContent } from '@/components/dashboard-content';
-import type { WasteEntry, Location, UserProfile } from '@/lib/types';
+import { getUser, getProfile, getLocations, getWasteEntries, getMonthlyEntryCount } from '@/lib/queries';
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect('/auth/login');
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  // cache() garantiza que estas llamadas NO re-fetchean — reusan lo del layout
+  const [profile, locations] = await Promise.all([
+    getProfile(),
+    getLocations(),
+  ]);
 
-  const { data: locations } = await supabase
-    .from('locations')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('name');
+  const isPaid = profile?.plan !== 'free';
 
-  const allLocations = (locations ?? []) as Location[];
-  const currentProfile = profile as UserProfile;
-
-  const locationIds = allLocations.map((l) => l.id);
-
-  // Waste this week
-  const weekStart = new Date();
-  weekStart.setDate(weekStart.getDate() - 7);
-
-  const { data: weekWaste } = locationIds.length
-    ? await supabase
-        .from('waste_entries')
-        .select('*')
-        .in('location_id', locationIds)
-        .gte('recorded_at', weekStart.toISOString())
-        .order('recorded_at', { ascending: false })
-    : { data: [] };
-
-  const weekEntries = (weekWaste ?? []) as WasteEntry[];
+  // Solo las queries específicas de esta página, en paralelo
+  const [weekEntries, monthlyEntryCount] = await Promise.all([
+    getWasteEntries(isPaid ? 30 : 7),
+    isPaid ? Promise.resolve(0) : getMonthlyEntryCount(),
+  ]);
 
   return (
     <DashboardContent
-      profile={currentProfile}
-      locations={allLocations}
+      profile={profile!}
+      locations={locations}
       weekEntries={weekEntries}
+      monthlyEntryCount={monthlyEntryCount}
     />
   );
 }
