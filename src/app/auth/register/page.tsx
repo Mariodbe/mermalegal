@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const [companyName, setCompanyName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,8 +37,25 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push('/dashboard');
-    router.refresh();
+    setEmailSent(true);
+    setLoading(false);
+  }
+
+  if (emailSent) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--bg-secondary)] px-4">
+        <div className="w-full max-w-md text-center">
+          <div className="text-5xl mb-6">📧</div>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-3">Revisa tu correo</h1>
+          <p className="text-[var(--text-secondary)] mb-2">
+            Te hemos enviado un enlace de confirmación a <strong className="text-[var(--text-primary)]">{email}</strong>.
+          </p>
+          <p className="text-sm text-[var(--text-muted)]">
+            Haz clic en el enlace del correo para activar tu cuenta y acceder al dashboard.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
