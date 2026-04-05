@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { LossCalculator } from '@/components/landing-interactive';
+import { SiteHeader } from '@/components/site-header';
 
 export const metadata: Metadata = {
   title: 'Calculadora Desperdicio Alimentario para Restaurantes — Ley 1/2025',
@@ -30,27 +31,7 @@ export default async function CalculadoraPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
-      {/* Header */}
-      <header className="border-b border-[var(--border-color)] bg-[var(--bg-primary)]/80 backdrop-blur sticky top-0 z-50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary-600">
-            <svg className="h-8 w-8" viewBox="0 0 32 32" fill="none">
-              <circle cx="16" cy="16" r="14" fill="#059669" opacity="0.15" />
-              <path d="M10 20c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#059669" strokeWidth="2" strokeLinecap="round" />
-              <path d="M16 8v6M13 11l3-3 3 3" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            MermaLegal
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link href="/blog" className="hidden sm:block text-sm text-[var(--text-secondary)] hover:text-primary-600 transition-colors">
-              Guía Ley 1/2025
-            </Link>
-            <Link href={ctaHref} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700 transition-colors">
-              {user ? 'Dashboard' : 'Empezar gratis'}
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-16">
         {/* Hero */}
