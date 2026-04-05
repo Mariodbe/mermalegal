@@ -18,8 +18,14 @@ export const metadata: Metadata = {
 };
 
 export default async function CalculadoraPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // No env vars in local dev — default to logged-out state
+  }
   const ctaHref = user ? '/dashboard' : '/auth/register';
 
   return (
