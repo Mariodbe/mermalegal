@@ -2,8 +2,14 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function BlogLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // No env vars in local dev — default to logged-out state
+  }
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
