@@ -141,6 +141,15 @@ export function DashboardShell({
                   {item.label}
                 </Link>
               ))}
+              <Link
+                href="/"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors border-l border-[var(--border-color)] ml-2 pl-4"
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Web
+              </Link>
             </nav>
           </div>
 
