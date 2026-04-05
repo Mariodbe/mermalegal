@@ -2,7 +2,10 @@ import type { NextConfig } from 'next';
 import { withSentryConfig } from '@sentry/nextjs';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 86400, // 24h
+  },
 };
 
 export default withSentryConfig(nextConfig, {

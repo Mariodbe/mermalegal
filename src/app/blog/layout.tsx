@@ -8,7 +8,7 @@ export default async function BlogLayout({ children }: { children: React.ReactNo
 
       {children}
 
-      <footer className="border-t border-[var(--border-color)] py-8 mt-16">
+      <footer aria-label="Pie de página" className="border-t border-[var(--border-color)] py-8 mt-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-[var(--text-muted)]">
           <p>&copy; {new Date().getFullYear()} MermaLegal · Herramienta de apoyo a la Ley 1/2025</p>
           <div className="flex gap-6">

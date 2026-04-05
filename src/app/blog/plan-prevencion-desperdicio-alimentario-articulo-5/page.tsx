@@ -14,13 +14,45 @@ export const metadata: Metadata = {
   },
 };
 
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: '¿Qué es el plan de prevención del desperdicio alimentario? (Artículo 5 Ley 1/2025)',
+  description:
+    'La Ley 1/2025 obliga a todos los establecimientos hosteleros a elaborar un plan de prevención del desperdicio alimentario. Qué tiene que incluir y cómo redactarlo.',
+  url: 'https://mermalegal.com/blog/plan-prevencion-desperdicio-alimentario-articulo-5',
+  datePublished: '2026-04-02',
+  dateModified: '2026-04-02',
+  author: { '@type': 'Organization', name: 'MermaLegal', url: 'https://mermalegal.com' },
+  publisher: {
+    '@type': 'Organization',
+    name: 'MermaLegal',
+    logo: { '@type': 'ImageObject', url: 'https://mermalegal.com/og-image.png' },
+  },
+  image: 'https://mermalegal.com/og-image.png',
+  inLanguage: 'es-ES',
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Blog', item: 'https://mermalegal.com/blog' },
+      { '@type': 'ListItem', position: 2, name: 'Plan de prevención Art. 5', item: 'https://mermalegal.com/blog/plan-prevencion-desperdicio-alimentario-articulo-5' },
+    ],
+  },
+};
+
 export default function ArticlePage() {
   return (
     <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
-      <nav className="text-sm text-[var(--text-muted)] mb-8">
-        <Link href="/blog" className="hover:text-primary-500">Blog</Link>
-        <span className="mx-2">›</span>
-        <span>Plan de prevención artículo 5</span>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <nav aria-label="Ruta de navegación" className="text-sm text-[var(--text-muted)] mb-8">
+        <ol className="flex items-center gap-1 list-none p-0 m-0">
+          <li><Link href="/blog" className="hover:text-primary-500">Blog</Link></li>
+          <li aria-hidden="true" className="mx-1">›</li>
+          <li aria-current="page">Plan de prevención artículo 5</li>
+        </ol>
       </nav>
 
       <div className="mb-10">

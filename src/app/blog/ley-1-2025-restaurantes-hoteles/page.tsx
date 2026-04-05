@@ -14,14 +14,45 @@ export const metadata: Metadata = {
   },
 };
 
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: 'Guía definitiva sobre la Ley 1/2025 para restaurantes y hoteles',
+  description:
+    'Todo lo que necesita saber el sector hostelero sobre la Ley 1/2025: qué establecimientos tienen que cumplirla, qué multas contempla y cómo prepararse.',
+  url: 'https://mermalegal.com/blog/ley-1-2025-restaurantes-hoteles',
+  datePublished: '2026-04-02',
+  dateModified: '2026-04-02',
+  author: { '@type': 'Organization', name: 'MermaLegal', url: 'https://mermalegal.com' },
+  publisher: {
+    '@type': 'Organization',
+    name: 'MermaLegal',
+    logo: { '@type': 'ImageObject', url: 'https://mermalegal.com/og-image.png' },
+  },
+  image: 'https://mermalegal.com/og-image.png',
+  inLanguage: 'es-ES',
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Blog', item: 'https://mermalegal.com/blog' },
+      { '@type': 'ListItem', position: 2, name: 'Guía Ley 1/2025', item: 'https://mermalegal.com/blog/ley-1-2025-restaurantes-hoteles' },
+    ],
+  },
+};
+
 export default function ArticlePage() {
   return (
     <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
-      {/* Breadcrumb */}
-      <nav className="text-sm text-[var(--text-muted)] mb-8">
-        <Link href="/blog" className="hover:text-primary-500">Blog</Link>
-        <span className="mx-2">›</span>
-        <span>Guía Ley 1/2025</span>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <nav aria-label="Ruta de navegación" className="text-sm text-[var(--text-muted)] mb-8">
+        <ol className="flex items-center gap-1 list-none p-0 m-0">
+          <li><Link href="/blog" className="hover:text-primary-500">Blog</Link></li>
+          <li aria-hidden="true" className="mx-1">›</li>
+          <li aria-current="page">Guía Ley 1/2025</li>
+        </ol>
       </nav>
 
       {/* Header */}

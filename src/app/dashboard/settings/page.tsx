@@ -20,6 +20,8 @@ export default function SettingsPage() {
   const [passwordSaved, setPasswordSaved] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [openingPortal, setOpeningPortal] = useState(false);
+  const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [openingCancel, setOpeningCancel] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -61,6 +63,17 @@ export default function SettingsPage() {
       window.location.href = body.url;
     } else {
       setOpeningPortal(false);
+    }
+  }
+
+  async function handleCancelSubscription() {
+    setOpeningCancel(true);
+    const res = await fetch('/api/stripe/portal', { method: 'POST' });
+    const body = await res.json();
+    if (body.url) {
+      window.location.href = body.url;
+    } else {
+      setOpeningCancel(false);
     }
   }
 
@@ -182,6 +195,52 @@ export default function SettingsPage() {
             <ExternalLink className="h-4 w-4" />
             {openingPortal ? 'Abriendo...' : 'Gestionar suscripción'}
           </button>
+        </div>
+      )}
+
+      {/* Cancel subscription */}
+      {profile.plan !== 'free' && (
+        <div className="rounded-2xl border border-red-800/40 bg-red-950/10 p-6 shadow-sm space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold text-red-400">Cancelar suscripción</h2>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
+              Al cancelar perderás el acceso a las funciones de pago al final del período de facturación actual. Tus datos se conservarán pero pasarás al plan Gratis.
+            </p>
+          </div>
+
+          {!cancelConfirm ? (
+            <button
+              onClick={() => setCancelConfirm(true)}
+              className="focus-ring rounded-lg border border-red-700 px-4 py-2 text-sm font-semibold text-red-400 hover:bg-red-950/40 transition-colors"
+            >
+              Cancelar suscripción
+            </button>
+          ) : (
+            <div className="rounded-xl border border-red-800/60 bg-red-950/30 p-4 space-y-3">
+              <p className="text-sm font-semibold text-red-300">
+                ¿Seguro que quieres cancelar?
+              </p>
+              <p className="text-xs text-red-400/80">
+                Serás redirigido al portal de Stripe donde podrás confirmar la cancelación. El acceso Pro se mantiene hasta el final del ciclo actual.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCancelSubscription}
+                  disabled={openingCancel}
+                  className="focus-ring rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
+                >
+                  {openingCancel ? 'Redirigiendo...' : 'Sí, cancelar'}
+                </button>
+                <button
+                  onClick={() => setCancelConfirm(false)}
+                  disabled={openingCancel}
+                  className="focus-ring rounded-lg border border-[var(--border-color)] px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-50 transition-colors"
+                >
+                  Volver
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

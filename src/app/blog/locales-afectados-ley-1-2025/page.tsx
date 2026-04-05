@@ -65,13 +65,45 @@ const tipos = [
   },
 ];
 
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: '¿Qué establecimientos tienen que cumplir la Ley 1/2025 de desperdicio alimentario?',
+  description:
+    'Restaurantes, bares, hoteles, caterings, comedores de empresa... Analizamos cada tipo de establecimiento hostelero y sus obligaciones según la Ley 1/2025.',
+  url: 'https://mermalegal.com/blog/locales-afectados-ley-1-2025',
+  datePublished: '2026-04-02',
+  dateModified: '2026-04-02',
+  author: { '@type': 'Organization', name: 'MermaLegal', url: 'https://mermalegal.com' },
+  publisher: {
+    '@type': 'Organization',
+    name: 'MermaLegal',
+    logo: { '@type': 'ImageObject', url: 'https://mermalegal.com/og-image.png' },
+  },
+  image: 'https://mermalegal.com/og-image.png',
+  inLanguage: 'es-ES',
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Blog', item: 'https://mermalegal.com/blog' },
+      { '@type': 'ListItem', position: 2, name: 'Locales afectados Ley 1/2025', item: 'https://mermalegal.com/blog/locales-afectados-ley-1-2025' },
+    ],
+  },
+};
+
 export default function ArticlePage() {
   return (
     <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
-      <nav className="text-sm text-[var(--text-muted)] mb-8">
-        <Link href="/blog" className="hover:text-primary-500">Blog</Link>
-        <span className="mx-2">›</span>
-        <span>Locales afectados Ley 1/2025</span>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <nav aria-label="Ruta de navegación" className="text-sm text-[var(--text-muted)] mb-8">
+        <ol className="flex items-center gap-1 list-none p-0 m-0">
+          <li><Link href="/blog" className="hover:text-primary-500">Blog</Link></li>
+          <li aria-hidden="true" className="mx-1">›</li>
+          <li aria-current="page">Locales afectados Ley 1/2025</li>
+        </ol>
       </nav>
 
       <div className="mb-10">

@@ -18,6 +18,45 @@ export const metadata: Metadata = {
   },
 };
 
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: '¿Es obligatorio tener un plan de prevención del desperdicio alimentario?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Sí. La Ley 1/2025, en vigor desde el 2 de abril de 2026, obliga a todos los establecimientos de hostelería y restauración a disponer de un plan de prevención documentado (artículo 5) y a registrar sus mermas con trazabilidad.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Qué establecimientos tienen que cumplir la Ley 1/2025?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Restaurantes, bares, cafeterías, hoteles con servicio de comidas, caterings, comedores colectivos y cualquier establecimiento que prepare o sirva alimentos al público. Afecta tanto a pequeños negocios como a grandes cadenas.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Cómo se calcula el desperdicio alimentario de un restaurante?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'La fórmula estándar es: (facturación anual × porcentaje de merma estimado). El porcentaje varía entre el 4% y el 12% según el tipo de establecimiento. La media del sector es el 7% según los datos empleados en la redacción de la Ley 1/2025.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Es suficiente con llevar un registro en papel?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'La ley exige que el registro de mermas sea verificable y con trazabilidad. Un Excel o registro en papel puede ser válido si está correctamente estructurado, pero es difícil de mantener y de presentar ante una inspección.',
+      },
+    },
+  ],
+};
+
 export default async function CalculadoraPage() {
   let user = null;
   try {
@@ -31,6 +70,10 @@ export default async function CalculadoraPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <SiteHeader />
 
       <main className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-16">

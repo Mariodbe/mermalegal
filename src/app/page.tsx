@@ -20,6 +20,7 @@ export const metadata: Metadata = {
       'Genera tu plan de prevención de desperdicio alimentario en 2 minutos. Obligatorio para restaurantes, hoteles y bares desde abril 2026.',
     url: 'https://mermalegal.com',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'MermaLegal — Evita multas Ley 1/2025' }],
   },
 };
 
@@ -779,7 +780,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-2 text-lg font-bold text-primary-600">
-              <svg className="h-6 w-6" viewBox="0 0 32 32" fill="none">
+              <svg className="h-6 w-6" viewBox="0 0 32 32" fill="none" aria-hidden="true">
                 <circle cx="16" cy="16" r="14" fill="#059669" opacity="0.15" />
                 <path d="M10 20c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#059669" strokeWidth="2" strokeLinecap="round" />
                 <path d="M16 8v6M13 11l3-3 3 3" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
