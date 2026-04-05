@@ -14,9 +14,32 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'MermaLegal - Cumplimiento de la Ley 1/2025 contra el desperdicio alimentario',
+  title: {
+    default: 'MermaLegal — Evita Multas Ley 1/2025 | Plan Prevención Desperdicio Alimentario',
+    template: '%s | MermaLegal',
+  },
   description:
-    'Plataforma de gestion de mermas alimentarias para restaurantes en Espana. Cumple con la Ley 1/2025 de prevencion de perdidas y desperdicio alimentario.',
+    'Genera el plan de prevención de desperdicio alimentario obligatorio por la Ley 1/2025. Evita multas de hasta 500.000€ en tu restaurante, hotel o bar. Gratis en 2 minutos.',
+  keywords: [
+    'ley 1 2025 hostelería',
+    'multas ley 1 2025',
+    'plan prevención desperdicio alimentario',
+    'registro trazabilidad mermas',
+    'ley desperdicio alimentario restaurantes',
+    'plan prevención mermas artículo 5',
+    'cómo hacer plan prevención desperdicio alimentario',
+  ],
+  authors: [{ name: 'MermaLegal' }],
+  creator: 'MermaLegal',
+  metadataBase: new URL('https://mermalegal.com'),
+  openGraph: {
+    siteName: 'MermaLegal',
+    locale: 'es_ES',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
 };
 
 export default function RootLayout({

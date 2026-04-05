@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -6,6 +7,20 @@ import {
   PDFMock,
   FadeInOnScroll,
 } from '@/components/landing-interactive';
+
+export const metadata: Metadata = {
+  title: 'Evita Multas Ley 1/2025 — Plan Prevención Desperdicio Alimentario Gratis',
+  description:
+    'Genera tu plan de prevención de desperdicio alimentario obligatorio por la Ley 1/2025. Evita multas de hasta 500.000€ en restaurantes, hoteles y bares. Gratis en 2 minutos.',
+  alternates: { canonical: 'https://mermalegal.com' },
+  openGraph: {
+    title: 'Evita multas de hasta 500.000€ — Plan Prevención Ley 1/2025',
+    description:
+      'Genera tu plan de prevención de desperdicio alimentario en 2 minutos. Obligatorio para restaurantes, hoteles y bares desde abril 2026.',
+    url: 'https://mermalegal.com',
+    type: 'website',
+  },
+};
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -40,7 +55,8 @@ export default async function HomePage() {
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[var(--text-secondary)]">
             <a href="#como-funciona" className="hover:text-primary-600 transition-colors">Cómo funciona</a>
-            <a href="#el-documento" className="hover:text-primary-600 transition-colors">El documento</a>
+            <Link href="/calculadora-desperdicio-restaurantes" className="hover:text-primary-600 transition-colors">Calculadora</Link>
+            <Link href="/blog" className="hover:text-primary-600 transition-colors">Guía Ley 1/2025</Link>
             <a href="#precios" className="hover:text-primary-600 transition-colors">Precios</a>
           </nav>
           <div className="flex items-center gap-3">
@@ -323,7 +339,7 @@ export default async function HomePage() {
               <div className="text-center mb-14">
                 <p className="text-sm font-semibold text-primary-500 uppercase tracking-wider mb-3">La solución</p>
                 <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)]">
-                  3 pasos. 2 minutos. Protegido.
+                  Cómo crear tu plan de prevención de desperdicio alimentario en 3 pasos
                 </h2>
                 <p className="mt-4 text-lg text-[var(--text-secondary)]">
                   Sin formularios interminables. Sin abogados. Sin conocimientos técnicos.
@@ -617,7 +633,7 @@ export default async function HomePage() {
               <div className="text-center mb-14">
                 <p className="text-sm font-semibold text-primary-500 uppercase tracking-wider mb-3">Precios</p>
                 <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)]">
-                  Menos que una cena de empresa.<br className="hidden sm:block" /> Y se paga sola el primer mes.
+                  Cumple la Ley 1/2025 sin complicaciones.<br className="hidden sm:block" /> Menos que una cena de empresa.
                 </h2>
                 <p className="mt-4 text-[var(--text-secondary)]">Sin permanencia. Cancela cuando quieras.</p>
               </div>
@@ -799,10 +815,11 @@ export default async function HomePage() {
             <p className="text-sm text-[var(--text-muted)]">
               &copy; {new Date().getFullYear()} MermaLegal · Herramienta de apoyo a la Ley 1/2025
             </p>
-            <div className="flex gap-6 text-sm text-[var(--text-muted)]">
+            <div className="flex flex-wrap gap-6 text-sm text-[var(--text-muted)]">
+              <Link href="/blog" className="hover:text-primary-600 transition-colors">Guía Ley 1/2025</Link>
+              <Link href="/calculadora-desperdicio-restaurantes" className="hover:text-primary-600 transition-colors">Calculadora</Link>
               <a href="/privacidad" className="hover:text-primary-600 transition-colors">Privacidad</a>
               <a href="/terminos" className="hover:text-primary-600 transition-colors">Términos</a>
-              <a href="#" className="hover:text-primary-600 transition-colors">Contacto</a>
             </div>
           </div>
           {/* Aviso legal */}
