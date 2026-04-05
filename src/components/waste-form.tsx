@@ -44,6 +44,22 @@ const DESTINATIONS: {
 // ── Trigger ───────────────────────────────────────────────────────────────────
 export function WasteFormTrigger({ locations }: { locations: Location[] }) {
   const [isOpen, setIsOpen] = useState(false);
+
+  if (locations.length === 0) {
+    return (
+      <a
+        href="/dashboard/locations"
+        className="focus-ring flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-4 text-lg font-bold text-white shadow-lg hover:bg-primary-700 active:scale-95 transition-all sm:px-8"
+        style={{ minHeight: '56px' }}
+      >
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Añadir local para empezar
+      </a>
+    );
+  }
+
   return (
     <>
       <button
@@ -80,7 +96,11 @@ function WasteFormModal({ locations, onClose }: { locations: Location[]; onClose
   }, []);
 
   async function handleSave() {
-    if (!locationId || !category || !destination || weight <= 0) return;
+    if (!locationId) {
+      setError('No hay ningún local seleccionado. Ve a Locales y añade uno primero.');
+      return;
+    }
+    if (!category || !destination || weight <= 0) return;
     setSaving(true);
     setError(null);
     try {
